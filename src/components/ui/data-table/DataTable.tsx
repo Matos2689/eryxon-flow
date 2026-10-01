@@ -102,6 +102,8 @@ interface DataTableProps<TData, TValue> {
   compact?: boolean;
   striped?: boolean;
   maxHeight?: string;
+  /** Minimum table width (e.g. "1280px"); narrower containers scroll horizontally */
+  minWidth?: string;
   /** Debounce delay for search in ms (default: 200ms) */
   searchDebounce?: number;
   /** Initial column visibility state (can be controlled externally for responsive columns) */
@@ -133,6 +135,7 @@ export function DataTable<TData, TValue>({
   compact = true, // Default to compact for data density
   striped = false,
   maxHeight = "calc(100vh - 280px)", // Default max height for viewport fitting
+  minWidth,
   searchDebounce = 200, // Debounce search for performance
   columnVisibility: controlledColumnVisibility,
   onColumnVisibilityChange,
@@ -199,7 +202,7 @@ export function DataTable<TData, TValue>({
         )}
         style={{ maxHeight: stickyHeader ? maxHeight : undefined }}
       >
-        <Table>
+        <Table style={minWidth ? { minWidth } : undefined}>
           <TableHeader className={cn(
             stickyHeader && "sticky top-0 bg-card z-10 shadow-sm"
           )}>

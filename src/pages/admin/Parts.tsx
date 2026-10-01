@@ -217,12 +217,13 @@ export default function Parts() {
       ),
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
-          <span className="font-medium">{row.getValue("part_number")}</span>
+          <span className="font-medium whitespace-nowrap">{row.getValue("part_number")}</span>
           {row.original.is_bullet_card && (
             <span className="inline-flex items-center rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] font-bold text-red-500 uppercase tracking-wide">{t("qrm.bulletCard")}</span>
           )}
         </div>
       ),
+      size: 340,
     },
     {
       id: "type",
@@ -256,6 +257,7 @@ export default function Parts() {
         if (value.includes("standalone") && !part.has_children && !part.parent_part_id) return true;
         return false;
       },
+      size: 120,
     },
     {
       accessorKey: "job.job_number",
@@ -263,30 +265,34 @@ export default function Parts() {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t("parts.jobNumber")} />
       ),
-      cell: ({ row }) => row.original.job?.job_number || "-",
+      cell: ({ row }) => <span className="whitespace-nowrap">{row.original.job?.job_number || "-"}</span>,
       filterFn: (row, id, value) => {
         const jobNumber = row.original.job?.job_number;
         return value.includes(jobNumber);
       },
+      size: 160,
     },
     {
       accessorKey: "material",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t("parts.material")} />
       ),
+      cell: ({ row }) => <span className="whitespace-nowrap">{row.getValue("material")}</span>,
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));
       },
+      size: 160,
     },
     {
       accessorKey: "status",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t("parts.status.title")} />
+        <DataTableColumnHeader column={column} title={t("parts.status.title")} className="justify-center [&_button]:ml-0" />
       ),
-      cell: ({ row }) => getStatusBadge(row.getValue("status")),
+      cell: ({ row }) => <div className="flex justify-center whitespace-nowrap">{getStatusBadge(row.getValue("status"))}</div>,
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));
       },
+      size: 160,
     },
     {
       id: "cell",
@@ -296,6 +302,7 @@ export default function Parts() {
         return part.cell ? (
           <Badge
             variant="outline"
+            className="whitespace-nowrap"
             style={{
               borderColor: part.cell.color,
               backgroundColor: `${part.cell.color}20`,
@@ -304,32 +311,34 @@ export default function Parts() {
             {part.cell.name}
           </Badge>
         ) : (
-          <span className="text-muted-foreground text-sm">{t("parts.notStarted")}</span>
+          <span className="text-muted-foreground text-sm whitespace-nowrap">{t("parts.notStarted")}</span>
         );
       },
+      size: 200,
     },
     {
       id: "route",
       header: t("qrm.flow"),
       cell: ({ row }) => <PartFlowCell partId={row.original.id} />,
-      size: 140,
+      size: 300,
     },
     {
       accessorKey: "operations_count",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t("parts.operations")} />
+        <DataTableColumnHeader column={column} title={t("parts.operations")} className="justify-center [&_button]:ml-0" />
       ),
       cell: ({ row }) => (
-        <div className="text-right">{row.getValue("operations_count")}</div>
+        <div className="text-center">{row.getValue("operations_count")}</div>
       ),
+      size: 120,
     },
     {
       id: "files",
-      header: t("parts.files"),
+      header: () => <div className="text-center">{t("parts.files")}</div>,
       cell: ({ row }) => {
         const part = row.original;
         return (
-          <div className="flex gap-1">
+          <div className="flex justify-center gap-1">
             {part.hasSTEP && (
               <Button
                 variant="ghost"
@@ -366,6 +375,7 @@ export default function Parts() {
           </div>
         );
       },
+      size: 100,
     },
     {
       id: "actions",
@@ -376,6 +386,7 @@ export default function Parts() {
           <Button
             variant="outline"
             size="sm"
+            className="whitespace-nowrap"
             onClick={(e) => {
               e.stopPropagation();
               setSelectedPartId(part.id);
@@ -386,6 +397,7 @@ export default function Parts() {
           </Button>
         );
       },
+      size: 160,
     },
   ], [getStatusBadge, handleViewFile, t]);
 
@@ -479,6 +491,7 @@ export default function Parts() {
           onRowClick={(row) => setSelectedPartId(row.id)}
           rowClassName={(row) => row.is_bullet_card ? "ring-1 ring-red-500/30 bg-red-500/5 animate-[pulse_3s_ease-in-out_1]" : ""}
           maxHeight={isMobile ? "calc(100vh - 320px)" : "calc(100vh - 280px)"}
+          minWidth="1820px"
         />
       </div>
 

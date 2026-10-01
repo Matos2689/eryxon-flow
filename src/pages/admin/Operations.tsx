@@ -217,7 +217,7 @@ export const Operations: React.FC = () => {
       ),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <span className="font-medium">{row.getValue("operation_name")}</span>
+          <span className="font-medium whitespace-nowrap">{row.getValue("operation_name")}</span>
           {row.original.resources_count > 0 && (
             <TooltipProvider>
               <Tooltip>
@@ -242,6 +242,7 @@ export const Operations: React.FC = () => {
           )}
         </div>
       ),
+      size: 280,
     },
     {
       accessorKey: "part_number",
@@ -250,12 +251,13 @@ export const Operations: React.FC = () => {
       ),
       cell: ({ row }) => (
         <span
-          className="text-primary cursor-pointer hover:underline"
+          className="text-primary cursor-pointer hover:underline whitespace-nowrap"
           onClick={() => navigate("/admin/parts")}
         >
           #{row.getValue("part_number")}
         </span>
       ),
+      size: 320,
     },
     {
       accessorKey: "job_number",
@@ -264,12 +266,13 @@ export const Operations: React.FC = () => {
       ),
       cell: ({ row }) => (
         <span
-          className="text-primary cursor-pointer hover:underline"
+          className="text-primary cursor-pointer hover:underline whitespace-nowrap"
           onClick={() => navigate("/admin/jobs")}
         >
           JOB-{row.getValue("job_number")}
         </span>
       ),
+      size: 170,
     },
     {
       accessorKey: "cell",
@@ -281,6 +284,7 @@ export const Operations: React.FC = () => {
         return (
           <Badge
             variant="outline"
+            className="whitespace-nowrap"
             style={{
               backgroundColor: op.cell_color ? `${op.cell_color}20` : '#f3f4f6',
               color: op.cell_color || '#374151',
@@ -294,6 +298,7 @@ export const Operations: React.FC = () => {
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));
       },
+      size: 190,
     },
     {
       accessorKey: "assigned_name",
@@ -314,16 +319,18 @@ export const Operations: React.FC = () => {
         if (value.includes("unassigned") && !assigned) return true;
         return false;
       },
+      size: 140,
     },
     {
       accessorKey: "status",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t("common.status")} />
+        <DataTableColumnHeader column={column} title={t("common.status")} className="justify-center [&_button]:ml-0" />
       ),
-      cell: ({ row }) => getStatusBadge(row.getValue("status"), row.original.released),
+      cell: ({ row }) => <div className="flex justify-center whitespace-nowrap">{getStatusBadge(row.getValue("status"), row.original.released)}</div>,
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));
       },
+      size: 210,
     },
   ], [getStatusBadge, navigate, t]);
 
@@ -440,6 +447,7 @@ export const Operations: React.FC = () => {
           rowSelection={rowSelection}
           onRowSelectionChange={setRowSelection}
           maxHeight={isMobile ? "calc(100vh - 320px)" : "calc(100vh - 280px)"}
+          minWidth="1360px"
         />
       </div>
 

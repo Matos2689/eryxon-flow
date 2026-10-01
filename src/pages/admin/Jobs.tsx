@@ -272,43 +272,43 @@ export default function Jobs() {
               <span className="inline-flex items-center rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] font-bold text-red-500 uppercase tracking-wide">{t("qrm.bulletCard")}</span>
             )}
           </div>
-          <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+          <span className="text-xs text-muted-foreground truncate max-w-[320px]" title={row.original.customer || undefined}>
             {row.original.customer || "-"}
           </span>
         </div>
       ),
-      size: 140,
+      size: 340,
     },
     {
       accessorKey: "due_date",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t("jobs.dueDate")} />
+        <DataTableColumnHeader column={column} title={t("jobs.dueDate")} className="justify-center [&_button]:ml-0" />
       ),
-      cell: ({ row }) => getDueDateDisplay(row.original),
+      cell: ({ row }) => <div className="flex justify-center">{getDueDateDisplay(row.original)}</div>,
       sortingFn: (rowA, rowB) => {
         // Jobs without a due date sort after every dated job.
         const timeA = effectiveDueDate(rowA.original)?.getTime() ?? Infinity;
         const timeB = effectiveDueDate(rowB.original)?.getTime() ?? Infinity;
         return timeA === timeB ? 0 : timeA < timeB ? -1 : 1;
       },
-      size: 100,
+      size: 140,
     },
     {
       accessorKey: "status",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t("jobs.status")} />
+        <DataTableColumnHeader column={column} title={t("jobs.status")} className="justify-center [&_button]:ml-0" />
       ),
-      cell: ({ row }) => getStatusBadge(row.getValue("status")),
+      cell: ({ row }) => <div className="flex justify-center">{getStatusBadge(row.getValue("status"))}</div>,
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));
       },
-      size: 120,
+      size: 160,
     },
     {
       id: "flow",
       header: t("qrm.flow"),
       cell: ({ row }) => <CompactOperationsFlow routing={row.original.routing} loading={false} />,
-      size: 140,
+      size: 300,
     },
     {
       id: "details",
@@ -329,7 +329,7 @@ export default function Jobs() {
           </div>
         );
       },
-      size: 140,
+      size: 170,
     },
     {
       id: "files",
@@ -374,7 +374,7 @@ export default function Jobs() {
           </div>
         );
       },
-      size: 80,
+      size: 100,
     },
     {
       id: "actions",
@@ -536,6 +536,7 @@ export default function Jobs() {
           compact={true}
           columnVisibility={{ ...columnVisibility, rush: false }}
           maxHeight={isMobile ? "calc(100vh - 320px)" : "calc(100vh - 280px)"}
+          minWidth="1280px"
         />
       </div>
 
