@@ -27,6 +27,20 @@ export function getDueUrgency(
   return "normal";
 }
 
+/**
+ * The date a job is due by (the override wins), or null when it has none - jobs created through
+ * the API may carry no due date, and new Date(null) would read as 1970 (and as overdue).
+ */
+export function effectiveDueDate(job: {
+  due_date?: string | null;
+  due_date_override?: string | null;
+}): Date | null {
+  const value = job.due_date_override || job.due_date;
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date : null;
+}
+
 /** Text color class for due date urgency */
 export const dueUrgencyTextClass: Record<DueUrgency, string> = {
   overdue: "text-red-600 dark:text-red-400",

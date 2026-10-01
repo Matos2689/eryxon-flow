@@ -58,12 +58,13 @@ import { DataTable } from "@/components/ui/data-table/DataTable";
 import { DataTableColumnHeader } from "@/components/ui/data-table/DataTableColumnHeader";
 import type { DataTableFilterableColumn } from "@/components/ui/data-table/DataTable";
 import { cn } from "@/lib/utils";
+import { effectiveDueDate } from "@/lib/due-date";
 
 interface JobData {
   id: string;
   job_number: string;
   customer: string;
-  due_date: string;
+  due_date: string | null;
   due_date_override: string | null;
   status: string;
   parts_count: number;
@@ -233,7 +234,9 @@ export default function Jobs() {
   }, [t]);
 
   const getDueDateDisplay = (job: JobData) => {
-    const dueDate = new Date(job.due_date_override || job.due_date);
+    const dueDate = effectiveDueDate(job);
+    if (!dueDate) return <span className="text-muted-foreground">-</span>;
+
     const today = new Date();
     const weekFromNow = addDays(today, 7);
 
@@ -283,9 +286,10 @@ export default function Jobs() {
       ),
       cell: ({ row }) => getDueDateDisplay(row.original),
       sortingFn: (rowA, rowB) => {
-        const dateA = new Date(rowA.original.due_date_override || rowA.original.due_date);
-        const dateB = new Date(rowB.original.due_date_override || rowB.original.due_date);
-        return dateA.getTime() - dateB.getTime();
+        // Jobs without a due date sort after every dated job.
+        const timeA = effectiveDueDate(rowA.original)?.getTime() ?? Infinity;
+        const timeB = effectiveDueDate(rowB.original)?.getTime() ?? Infinity;
+        return timeA === timeB ? 0 : timeA < timeB ? -1 : 1;
       },
       size: 100,
     },
@@ -490,8 +494,8 @@ export default function Jobs() {
       active: jobs.filter((j: JobData) => j.status === "in_progress").length,
       completed: jobs.filter((j: JobData) => j.status === "completed").length,
       overdue: jobs.filter((j: JobData) => {
-        const dueDate = new Date(j.due_date_override || j.due_date);
-        return isBefore(dueDate, today) && j.status !== "completed";
+        const dueDate = effectiveDueDate(j);
+        return dueDate !== null && isBefore(dueDate, today) && j.status !== "completed";
       }).length,
     };
   }, [jobs]);

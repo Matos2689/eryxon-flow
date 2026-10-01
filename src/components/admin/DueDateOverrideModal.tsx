@@ -111,7 +111,7 @@ export default function DueDateOverrideModal({
             <div className="flex items-center gap-2 mt-1">
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               <span className="font-medium">
-                {format(new Date(job?.due_date), "MMM dd, yyyy")}
+                {job?.due_date ? format(new Date(job.due_date), "MMM dd, yyyy") : t("dashboard.noDueDate")}
               </span>
             </div>
           </div>
