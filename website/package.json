@@ -14,15 +14,15 @@
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.0",
-    "@astrojs/starlight": "^0.42.0",
+    "@astrojs/starlight": "^0.42.4",
     "@astrojs/starlight-tailwind": "5.0.0",
     "@tailwindcss/vite": "^4.1.17",
-    "astro": "^7.3.1",
+    "astro": "^7.3.5",
     "astro-font": "^1.1.0",
-    "marked": "^18.0.11",
+    "marked": "^18.0.14",
     "mermaid": "^11.16.0",
-    "sharp": "^0.35.4",
-    "vite": "^8.0.13"
+    "sharp": "^0.35.5",
+    "vite": "^8.3.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
