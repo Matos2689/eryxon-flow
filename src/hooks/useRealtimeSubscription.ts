@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
@@ -38,6 +38,7 @@ export function useRealtimeSubscription({
   debounceMs = 100,
   includePayload = false,
 }: RealtimeSubscriptionOptions): void {
+  const instanceId = useId().replace(/:/g, '');
   const callbackRef = useRef(onDataChange);
   useEffect(() => { callbackRef.current = onDataChange; }, [onDataChange]);
 
@@ -51,7 +52,7 @@ export function useRealtimeSubscription({
     if (!enabled || subscriptions.length === 0) return;
 
     let pending: ReturnType<typeof setTimeout> | undefined;
-    const channel = supabase.channel(channelName);
+    const channel = supabase.channel(`${channelName}-${instanceId}`);
     for (const { table, filter, event, schema } of subscriptions) {
       const config = { table, schema, ...(filter ? { filter } : {}) };
       const handleChange = (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
@@ -73,7 +74,7 @@ export function useRealtimeSubscription({
       clearTimeout(pending);
       void supabase.removeChannel(channel);
     };
-  }, [channelName, tableKey, enabled, debounceMs, includePayload]);
+  }, [channelName, tableKey, enabled, debounceMs, includePayload, instanceId,]);
 }
 
 /**
