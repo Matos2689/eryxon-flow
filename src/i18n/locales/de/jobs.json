@@ -97,7 +97,8 @@
     "jobOnHold": "Auftrag wurde angehalten",
     "jobResumed": "Auftrag wurde fortgesetzt",
     "resumeJob": "Auftrag fortsetzen",
-    "putOnHold": "Anhalten"
+    "putOnHold": "Anhalten",
+    "goodOfRequired": "Gutteile / benötigte Menge"
   },
   "parts": {
     "title": "Teileverwaltung",
@@ -328,7 +329,13 @@
     "inProgress": "In Bearbeitung",
     "totalParts": "Teile gesamt",
     "totalVolume": "Gesamtvolumen",
-    "totalWeight": "Gesamtgewicht"
+    "totalWeight": "Gesamtgewicht",
+    "quality": {
+      "title": "Qualität",
+      "pending": "Ausstehend",
+      "good": "Gut",
+      "bad": "Schlecht"
+    }
   },
   "operations": {
     "title": "Arbeitsgänge",

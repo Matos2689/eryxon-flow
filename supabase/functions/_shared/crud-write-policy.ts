@@ -3,8 +3,8 @@ import { BadRequestError } from "./validation/errorHandler.ts";
 
 // Service-role CRUD must restrict columns and references independently of RLS.
 const writableFields: Record<string, string> = {
-  jobs: 'actual_duration completed_at current_cell_id customer delivery_address delivery_city delivery_country delivery_lat delivery_lng delivery_postal_code due_date due_date_override external_id external_source job_number metadata notes package_count paused_at resumed_at started_at status total_volume_m3 total_weight_kg',
-  parts: 'cnc_program_name current_cell_id drawing_no external_id external_source file_paths height_mm image_paths is_bullet_card job_id length_mm material material_cert_number material_lot material_supplier metadata notes parent_part_id part_number quantity status weight_kg width_mm',
+  jobs: 'actual_duration completed_at current_cell_id customer delivery_address delivery_city delivery_country delivery_lat delivery_lng delivery_postal_code due_date due_date_override external_id external_source job_number metadata notes package_count paused_at required_quantity resumed_at started_at status total_volume_m3 total_weight_kg',
+  parts: 'cnc_program_name current_cell_id drawing_no external_id external_source file_paths height_mm image_paths is_bullet_card job_id length_mm material material_cert_number material_lot material_supplier metadata notes parent_part_id part_number quality_status quantity status weight_kg width_mm',
   // Lifecycle state (status, timestamps, actual_time) changes only through the lifecycle endpoints.
   operations: 'assigned_operator_id cell_id changeover_time estimated_time external_id external_source icon_name metadata notes operation_name part_id planned_end planned_start run_time_per_unit sequence setup_time wait_time',
   assignments: 'assigned_by job_id operator_id part_id shop_floor_operator_id status',

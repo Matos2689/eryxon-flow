@@ -45,6 +45,7 @@ interface PartData {
   part_number: string;
   material: string;
   status: string;
+  quality_status: string | null;
   parent_part_id: string | null;
   job?: { job_number: string };
   cell?: { name: string; color: string };
@@ -105,7 +106,7 @@ export default function Parts() {
           job:jobs(job_number),
           cell:cells(name, color),
           operations(count)
-        `).eq("tenant_id", profile.tenant_id).order("id");
+        `).eq("tenant_id", profile.tenant_id).order("part_number").order("id");
 
       const data = await fetchAllPages((from, to) => query.range(from, to));
 
@@ -209,6 +210,15 @@ export default function Parts() {
     );
   }, []);
 
+  // Inspection verdict; parts without quality tracking show "-".
+  const getQualityBadge = useCallback((quality: PartData["quality_status"]) => {
+    if (!quality) {
+      return <span className="text-xs text-muted-foreground">-</span>;
+    }
+    const badgeStatus: Record<string, "pending" | "approved" | "rejected"> = { pending: "pending", good: "approved", bad: "rejected" };
+    return <StatusBadge status={badgeStatus[quality] ?? "pending"} label={t(`parts.quality.${quality}`, quality)} />;
+  }, [t]);
+
   const columns: ColumnDef<PartData>[] = useMemo(() => [
     {
       accessorKey: "part_number",
@@ -217,7 +227,8 @@ export default function Parts() {
       ),
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
-          <span className="font-medium whitespace-nowrap">{row.getValue("part_number")}</span>
+          {/* Wraps instead of widening the column: part numbers can always get longer. */}
+          <span className="font-medium min-w-0 break-words">{row.getValue("part_number")}</span>
           {row.original.is_bullet_card && (
             <span className="inline-flex items-center rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] font-bold text-red-500 uppercase tracking-wide">{t("qrm.bulletCard")}</span>
           )}
@@ -293,6 +304,19 @@ export default function Parts() {
         return value.includes(row.getValue(id));
       },
       size: 160,
+    },
+    {
+      accessorKey: "quality_status",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t("parts.quality.title")} className="justify-center [&_button]:ml-0" />
+      ),
+      cell: ({ row }) => (
+        <div className="flex justify-center whitespace-nowrap">{getQualityBadge(row.original.quality_status)}</div>
+      ),
+      filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id));
+      },
+      size: 130,
     },
     {
       id: "cell",
@@ -399,7 +423,7 @@ export default function Parts() {
       },
       size: 160,
     },
-  ], [getStatusBadge, handleViewFile, t]);
+  ], [getStatusBadge, getQualityBadge, handleViewFile, t]);
 
   const filterableColumns: DataTableFilterableColumn[] = useMemo(() => [
     {
@@ -410,6 +434,15 @@ export default function Parts() {
         { label: t("parts.status.inProgress"), value: "in_progress" },
         { label: t("parts.status.onHold"), value: "on_hold" },
         { label: t("parts.status.completed"), value: "completed" },
+      ],
+    },
+    {
+      id: "quality_status",
+      title: t("parts.quality.title"),
+      options: [
+        { label: t("parts.quality.pending"), value: "pending" },
+        { label: t("parts.quality.good"), value: "good" },
+        { label: t("parts.quality.bad"), value: "bad" },
       ],
     },
     {
@@ -439,6 +472,7 @@ export default function Parts() {
     { id: "job_number", alwaysVisible: true },
     { id: "material", hideBelow: "md" },       // Hide on mobile
     { id: "status", alwaysVisible: true },
+    { id: "quality_status", hideBelow: "md" },
     { id: "cell", hideBelow: "lg" },           // Hide on mobile/tablet
     { id: "operations_count", hideBelow: "md" }, // Hide on mobile
     { id: "files", hideBelow: "md" },          // Hide on mobile
@@ -491,7 +525,7 @@ export default function Parts() {
           onRowClick={(row) => setSelectedPartId(row.id)}
           rowClassName={(row) => row.is_bullet_card ? "ring-1 ring-red-500/30 bg-red-500/5 animate-[pulse_3s_ease-in-out_1]" : ""}
           maxHeight={isMobile ? "calc(100vh - 320px)" : "calc(100vh - 280px)"}
-          minWidth="1820px"
+          minWidth="1950px"
         />
       </div>
 

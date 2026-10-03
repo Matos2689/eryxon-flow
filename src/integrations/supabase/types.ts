@@ -1389,6 +1389,7 @@ export type Database = {
           job_number: string
           metadata: Json | null
           notes: string | null
+          required_quantity: number | null
           package_count: number | null
           search_vector: unknown
           status: Database["public"]["Enums"]["job_status"] | null
@@ -1419,6 +1420,7 @@ export type Database = {
           job_number: string
           metadata?: Json | null
           notes?: string | null
+          required_quantity?: number | null
           package_count?: number | null
           search_vector?: unknown
           status?: Database["public"]["Enums"]["job_status"] | null
@@ -1449,6 +1451,7 @@ export type Database = {
           job_number?: string
           metadata?: Json | null
           notes?: string | null
+          required_quantity?: number | null
           package_count?: number | null
           search_vector?: unknown
           status?: Database["public"]["Enums"]["job_status"] | null
@@ -2345,6 +2348,7 @@ export type Database = {
           notes: string | null
           parent_part_id: string | null
           part_number: string
+          quality_status: string | null
           quantity: number | null
           search_vector: unknown
           status: Database["public"]["Enums"]["job_status"] | null
@@ -2379,6 +2383,7 @@ export type Database = {
           notes?: string | null
           parent_part_id?: string | null
           part_number: string
+          quality_status?: string | null
           quantity?: number | null
           search_vector?: unknown
           status?: Database["public"]["Enums"]["job_status"] | null
@@ -2413,6 +2418,7 @@ export type Database = {
           notes?: string | null
           parent_part_id?: string | null
           part_number?: string
+          quality_status?: string | null
           quantity?: number | null
           search_vector?: unknown
           status?: Database["public"]["Enums"]["job_status"] | null

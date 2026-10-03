@@ -251,7 +251,7 @@ export const Operations: React.FC = () => {
       ),
       cell: ({ row }) => (
         <span
-          className="text-primary cursor-pointer hover:underline whitespace-nowrap"
+          className="text-primary cursor-pointer hover:underline break-words"
           onClick={() => navigate("/admin/parts")}
         >
           #{row.getValue("part_number")}

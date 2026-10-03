@@ -97,7 +97,8 @@
     "jobOnHold": "Opdracht is in de wacht gezet",
     "jobResumed": "Opdracht is hervat",
     "resumeJob": "Opdracht hervatten",
-    "putOnHold": "In de wacht zetten"
+    "putOnHold": "In de wacht zetten",
+    "goodOfRequired": "Goede onderdelen / benodigde hoeveelheid"
   },
   "parts": {
     "title": "Onderdelenbeheer",
@@ -328,7 +329,13 @@
     "inProgress": "Bezig",
     "totalParts": "Totaal onderdelen",
     "totalVolume": "Totaal volume",
-    "totalWeight": "Totaal gewicht"
+    "totalWeight": "Totaal gewicht",
+    "quality": {
+      "title": "Kwaliteit",
+      "pending": "In afwachting",
+      "good": "Goed",
+      "bad": "Afgekeurd"
+    }
   },
   "operations": {
     "title": "Bewerkingen",

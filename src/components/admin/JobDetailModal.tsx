@@ -38,6 +38,7 @@ interface JobOperationCell {
 interface JobOperation {
   id: string;
   operation_name: string;
+  sequence: number;
   status: string;
   estimated_time: number | null;
   cell: JobOperationCell | null;
@@ -49,6 +50,7 @@ interface JobPart {
   material: string;
   quantity: number;
   status: string;
+  quality_status: string | null;
   parent_part_id: string | null;
   weight_kg: number | null;
   length_mm: number | null;
@@ -302,7 +304,10 @@ export default function JobDetailModal({ jobId, onClose, onUpdate }: JobDetailMo
             </TabsContent>
 
             <TabsContent value="parts" className="p-4 sm:p-6 space-y-3 m-0">
-              {job?.parts?.map((part: JobPart) => {
+              {/* The nested select returns rows in no particular order: list parts by number. */}
+              {[...(job?.parts ?? [])]
+                .sort((a: JobPart, b: JobPart) => a.part_number.localeCompare(b.part_number, undefined, { numeric: true }))
+                .map((part: JobPart) => {
                 const partCompletedOps = part.operations?.filter((op: JobOperation) => op.status === "completed").length || 0;
                 const partTotalOps = part.operations?.length || 0;
 
@@ -332,12 +337,23 @@ export default function JobDetailModal({ jobId, onClose, onUpdate }: JobDetailMo
                         `} variant="outline">
                           {part.status?.replace("_", " ")}
                         </Badge>
+                        {part.quality_status && (
+                          <Badge className={`text-[10px] py-0.5 h-5
+                            ${part.quality_status === 'good' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : ''}
+                            ${part.quality_status === 'bad' ? 'bg-red-500/10 text-red-600 border-red-500/20' : ''}
+                            ${part.quality_status === 'pending' ? 'bg-slate-500/10 text-slate-600 border-slate-500/20' : ''}
+                          `} variant="outline" title={t("parts.quality.title")}>
+                            {t(`parts.quality.${part.quality_status}`, part.quality_status)}
+                          </Badge>
+                        )}
                       </div>
                     </div>
 
                     {part.operations && part.operations.length > 0 && (
                       <div className="divide-y">
-                        {part.operations.map((operation: JobOperation, index: number) => {
+                        {[...part.operations]
+                          .sort((a: JobOperation, b: JobOperation) => a.sequence - b.sequence)
+                          .map((operation: JobOperation, index: number) => {
                           const isCompleted = operation.status === "completed";
                           const isInProgress = operation.status === "in_progress";
                           const cellColor = operation.cell?.color || '#6B7280';

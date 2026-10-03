@@ -18,6 +18,7 @@ export interface JobData {
   customer_name?: string;
   description?: string;
   metadata?: any;
+  required_quantity?: number | null;
 }
 
 export interface PartData {
@@ -87,6 +88,16 @@ export class JobValidator extends BaseValidator<JobData> {
       false,
     );
     if (statusError) errors.push(statusError);
+
+    // Optional: required_quantity (good units the job must deliver; null = not quality tracked)
+    if (entity.required_quantity !== undefined && entity.required_quantity !== null) {
+      const requiredError = this.validateNumber(entity, "required_quantity", index, {
+        min: 1,
+        required: false,
+        integer: true,
+      });
+      if (requiredError) errors.push(requiredError);
+    }
 
     // Optional: priority (number >= 0)
     const priorityError = this.validateNumber(entity, "priority", index, {

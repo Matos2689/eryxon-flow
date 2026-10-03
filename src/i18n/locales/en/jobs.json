@@ -97,7 +97,8 @@
     "createNewJob": "Create New Job",
     "createSuccessDesc": "The job has been created and is ready for production",
     "inProgress": "In Progress",
-    "totalJobs": "Total Jobs"
+    "totalJobs": "Total Jobs",
+    "goodOfRequired": "Good parts / required quantity"
   },
   "parts": {
     "title": "Parts Management",
@@ -328,7 +329,13 @@
     "inProgress": "In Progress",
     "totalParts": "Total Parts",
     "totalVolume": "Total Volume",
-    "totalWeight": "Total Weight"
+    "totalWeight": "Total Weight",
+    "quality": {
+      "title": "Quality",
+      "pending": "Pending",
+      "good": "Good",
+      "bad": "Bad"
+    }
   },
   "operations": {
     "title": "Operations",

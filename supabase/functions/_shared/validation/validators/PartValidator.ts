@@ -6,6 +6,8 @@
 import { BaseValidator } from "../BaseValidator.ts";
 import { ValidationContext, ValidationError } from "../types.ts";
 
+const QUALITY_STATUSES = ["pending", "good", "bad"];
+
 export interface PartUpdateData {
   part_number?: string;
   quantity?: number;
@@ -19,6 +21,7 @@ export interface PartUpdateData {
   drawing_no?: string;
   cnc_program_name?: string;
   is_bullet_card?: boolean;
+  quality_status?: string | null;
 }
 
 export class PartValidator extends BaseValidator<PartUpdateData> {
@@ -63,6 +66,12 @@ export class PartValidator extends BaseValidator<PartUpdateData> {
         integer: true,
       });
       if (quantityError) errors.push(quantityError);
+    }
+
+    // quality_status (inspection verdict; null = not quality tracked)
+    if (entity.quality_status !== undefined) {
+      const qualityError = this.validateEnum(entity, "quality_status", QUALITY_STATUSES, index, false);
+      if (qualityError) errors.push(qualityError);
     }
 
     // parent_part_id

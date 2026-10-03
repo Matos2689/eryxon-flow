@@ -69,6 +69,10 @@ interface JobData {
   status: string;
   parts_count: number;
   operations_count: number;
+  /** Good units the job must deliver; null when the job is not quality tracked. */
+  required_quantity: number | null;
+  /** Units of completed parts whose quality is good. */
+  good_quantity: number;
   stepFiles: string[];
   pdfFiles: string[];
   hasSTEP: boolean;
@@ -100,7 +104,7 @@ export default function Jobs() {
     queryFn: async () => {
       const query = supabase.from("jobs").select(`
           *,
-          parts(id, file_paths, is_bullet_card, operations(id, status, cell_id, cell:cells(id, name, color, sequence)))
+          parts(id, file_paths, is_bullet_card, quantity, status, quality_status, operations(id, status, cell_id, cell:cells(id, name, color, sequence)))
         `).eq("tenant_id", profile.tenant_id).order("id");
 
       const data = await fetchAllPages((from, to) => query.range(from, to));
@@ -119,6 +123,10 @@ export default function Jobs() {
         return {
           ...job,
           parts_count: job.parts?.length || 0,
+          good_quantity:
+            job.parts
+              ?.filter((part) => part.status === "completed" && part.quality_status === "good")
+              .reduce((sum, part) => sum + (part.quantity || 0), 0) || 0,
           operations_count:
             job.parts?.reduce(
               (sum, part) => sum + (part.operations?.length || 0),
@@ -308,7 +316,7 @@ export default function Jobs() {
       id: "flow",
       header: t("qrm.flow"),
       cell: ({ row }) => <CompactOperationsFlow routing={row.original.routing} loading={false} />,
-      size: 300,
+      size: 250,
     },
     {
       id: "details",
@@ -325,11 +333,25 @@ export default function Jobs() {
               <Layers className="h-3.5 w-3.5" />
               {job.operations_count}
             </span>
+            {job.required_quantity !== null && (
+              <span
+                className={cn(
+                  "flex items-center gap-1 whitespace-nowrap",
+                  job.good_quantity >= job.required_quantity
+                    ? "text-[hsl(var(--color-success))]"
+                    : "text-[hsl(var(--color-warning))]",
+                )}
+                title={t("jobs.goodOfRequired")}
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                {job.good_quantity}/{job.required_quantity}
+              </span>
+            )}
             <JobIssueBadge jobId={job.id} size="sm" />
           </div>
         );
       },
-      size: 170,
+      size: 180,
     },
     {
       id: "files",
@@ -536,7 +558,7 @@ export default function Jobs() {
           compact={true}
           columnVisibility={{ ...columnVisibility, rush: false }}
           maxHeight={isMobile ? "calc(100vh - 320px)" : "calc(100vh - 280px)"}
-          minWidth="1280px"
+          minWidth="1240px"
         />
       </div>
 
