@@ -86,6 +86,12 @@ export interface CrudConfig {
    * must not break the create response.
    */
   onCreated?: (ctx: HandlerContext, record: Record<string, unknown>) => Promise<void>;
+
+  /**
+   * Optional hook that completes a POST body before it is validated and inserted, e.g. to fill
+   * a required column the caller cannot know (the author of a record created with an API key).
+   */
+  prepareCreate?: (ctx: HandlerContext, body: Record<string, unknown>) => Promise<Record<string, unknown>>;
 }
 
 /**
@@ -109,6 +115,7 @@ export function createCrudHandler(config: CrudConfig) {
     syncIdField = 'external_id',
     entityKey,
     onCreated,
+    prepareCreate,
   } = config;
 
   // Compute entity key for singular responses (default: naive singularization)
@@ -150,7 +157,7 @@ export function createCrudHandler(config: CrudConfig) {
         if (customHandlers.post) {
           return customHandlers.post(req, ctx);
         }
-        return handlePost(req, ctx, table, validator, softDelete, responseEntityKey, onCreated);
+        return handlePost(req, ctx, table, validator, softDelete, responseEntityKey, onCreated, prepareCreate);
 
       case 'PATCH':
       case 'PUT':
@@ -323,11 +330,13 @@ async function handlePost(
   validator: ValidatorConstructor | undefined,
   softDelete: boolean,
   entityKey: string,
-  onCreated?: (ctx: HandlerContext, record: Record<string, unknown>) => Promise<void>
+  onCreated?: (ctx: HandlerContext, record: Record<string, unknown>) => Promise<void>,
+  prepareCreate?: (ctx: HandlerContext, body: Record<string, unknown>) => Promise<Record<string, unknown>>
 ): Promise<Response> {
   const { supabase, tenantId } = ctx;
 
-  const body = await validateCrudWrite(table, await req.json(), tenantId, supabase);
+  const written = await validateCrudWrite(table, await req.json(), tenantId, supabase);
+  const body = prepareCreate ? await prepareCreate(ctx, written) : written;
 
   // Validate if validator provided
   if (validator) {

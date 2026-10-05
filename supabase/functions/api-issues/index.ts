@@ -71,6 +71,37 @@ async function handleGet(req: Request, ctx: HandlerContext): Promise<Response> {
   });
 }
 
+/**
+ * An issue needs an author (created_by), but a record created with an API key (an integration,
+ * e.g. an automatic NCR from the VirtualFactory) has no user. Without an explicit created_by, the
+ * author is the user who created that API key.
+ */
+async function defaultIssueAuthor(
+  ctx: HandlerContext,
+  body: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  if (body.created_by || !ctx.apiKeyId) {
+    return body;
+  }
+
+  const { data: key, error } = await ctx.supabase
+    .from("api_keys")
+    .select("created_by")
+    .eq("id", ctx.apiKeyId)
+    .eq("tenant_id", ctx.tenantId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to resolve the issue author: ${error.message}`);
+  }
+
+  if (!key?.created_by) {
+    throw new BadRequestError("created_by is required: this API key has no owner to report the issue as");
+  }
+
+  return { ...body, created_by: key.created_by };
+}
+
 const issuesCrudConfig = {
   table: "issues",
   selectFields: `
@@ -129,6 +160,7 @@ const issuesCrudConfig = {
   defaultSort: { field: "created_at", direction: "desc" as const },
   softDelete: false,
   validator: IssueValidator,
+  prepareCreate: defaultIssueAuthor,
 };
 
 const defaultIssuesHandler = createCrudHandler(issuesCrudConfig);

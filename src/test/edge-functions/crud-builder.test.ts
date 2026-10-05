@@ -70,6 +70,19 @@ describe('CRUD with real PostgREST thenables', () => {
     expect(new URL(String(transport.mock.calls[0][0])).searchParams.get('tenant_id')).toBe(`eq.${tenantId}`);
   });
 
+  it('lets prepareCreate complete the body before it is inserted', async () => {
+    const transport = vi.fn<typeof fetch>().mockResolvedValue(json({ id: recordId, job_number: 'test', notes: 'filled' }, 201));
+    const { req, ctx } = setup(transport, '', 'POST', { job_number: 'test' });
+    const prepareCreate = vi.fn(async (_ctx: HandlerContext, body: Record<string, unknown>) => ({ ...body, notes: 'filled' }));
+
+    const response = await createCrudHandler({ table: 'jobs', prepareCreate })(req, ctx);
+
+    expect(response.status).toBe(201);
+    expect(prepareCreate).toHaveBeenCalledWith(ctx, { job_number: 'test' });
+    const insert = transport.mock.calls.find(([, init]) => init?.method === 'POST');
+    expect(JSON.parse(String(insert![1]!.body))).toMatchObject({ job_number: 'test', notes: 'filled', tenant_id: tenantId });
+  });
+
   it.each(['id', 'tenant_id', 'deleted_at'])('rejects mass assignment of %s', async (field) => {
     const transport = vi.fn<typeof fetch>();
     const { req, ctx } = setup(transport, '', 'POST', { job_number: 'test', [field]: recordId });
