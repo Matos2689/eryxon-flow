@@ -162,7 +162,7 @@ export const operationSearchConfig: EntitySearchConfig<OperationRow> = {
     notes,
     parts!inner(part_number, jobs!inner(job_number, customer)),
     cells(name),
-    profiles(full_name, email)
+    profiles!assigned_operator_id(full_name, email)
   `,
   searchColumns: ["operation_name", "notes"],
   resultPath: "/admin/assignments",

@@ -193,7 +193,7 @@ export default function PartDetailModal({ partId, onClose, onUpdate }: PartDetai
         .select(`
           *,
           cell:cells(name, color),
-          assigned_operator:profiles(full_name)
+          assigned_operator:profiles!assigned_operator_id(full_name)
         `)
         .eq("part_id", partId)
         .order("sequence");
