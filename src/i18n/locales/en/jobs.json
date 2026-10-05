@@ -621,7 +621,15 @@
     "searchPlaceholder": "Search issues...",
     "submit": "Submit issue",
     "subtitle": "Review and manage quality issues reported from the shop floor",
-    "totalIssues": "Total Issues"
+    "totalIssues": "Total Issues",
+    "disposition": "Disposition",
+    "dispositions": {
+      "scrap": "Scrap",
+      "rework": "Rework",
+      "useAsIs": "Use as is",
+      "returnToSupplier": "Return to supplier"
+    },
+    "rootCause": "Root Cause"
   },
   "jobCreate": {
     "title": "Create New Job",

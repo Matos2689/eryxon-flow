@@ -74,14 +74,20 @@ async function handleGet(req: Request, ctx: HandlerContext): Promise<Response> {
 /**
  * An issue needs an author (created_by), but a record created with an API key (an integration,
  * e.g. an automatic NCR from the VirtualFactory) has no user. Without an explicit created_by, the
- * author is the user who created that API key.
+ * author is the user who created that API key. An issue created already reviewed (status other
+ * than pending, e.g. an NCR an integration closes because its disposition is fixed) is likewise
+ * recorded as reviewed by that user, now, unless reviewed_by / reviewed_at are given.
  */
 async function defaultIssueAuthor(
   ctx: HandlerContext,
   body: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
-  if (body.created_by || !ctx.apiKeyId) {
-    return body;
+  const reviewed = typeof body.status === "string" && body.status !== "pending";
+  const needsAuthor = !body.created_by;
+  const needsReviewer = reviewed && !body.reviewed_by;
+
+  if ((!needsAuthor && !needsReviewer) || !ctx.apiKeyId) {
+    return reviewed && !body.reviewed_at ? { ...body, reviewed_at: new Date().toISOString() } : body;
   }
 
   const { data: key, error } = await ctx.supabase
@@ -99,7 +105,12 @@ async function defaultIssueAuthor(
     throw new BadRequestError("created_by is required: this API key has no owner to report the issue as");
   }
 
-  return { ...body, created_by: key.created_by };
+  return {
+    ...body,
+    ...(needsAuthor ? { created_by: key.created_by } : {}),
+    ...(needsReviewer ? { reviewed_by: key.created_by } : {}),
+    ...(reviewed && !body.reviewed_at ? { reviewed_at: new Date().toISOString() } : {}),
+  };
 }
 
 const issuesCrudConfig = {

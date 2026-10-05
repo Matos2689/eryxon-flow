@@ -621,7 +621,15 @@
     "subtitle": "Bekijk en beheer kwaliteitsproblemen gemeld vanaf de werkvloer",
     "totalIssues": "Totaal problemen",
     "whatKindOfIssue": "Wat voor probleem?",
-    "moreDetails": "Meer details"
+    "moreDetails": "Meer details",
+    "disposition": "Dispositie",
+    "dispositions": {
+      "scrap": "Afkeuren",
+      "rework": "Herbewerken",
+      "useAsIs": "Gebruiken zoals het is",
+      "returnToSupplier": "Retour leverancier"
+    },
+    "rootCause": "Grondoorzaak"
   },
   "jobCreate": {
     "title": "Nieuwe Order Aanmaken",

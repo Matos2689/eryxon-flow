@@ -621,7 +621,15 @@
     "subtitle": "Überprüfen und verwalten Sie von der Fertigung gemeldete Qualitätsprobleme",
     "totalIssues": "Probleme gesamt",
     "whatKindOfIssue": "Welche Art von Problem?",
-    "moreDetails": "Weitere Details"
+    "moreDetails": "Weitere Details",
+    "disposition": "Verwendungsentscheid",
+    "dispositions": {
+      "scrap": "Verschrotten",
+      "rework": "Nacharbeit",
+      "useAsIs": "Verwenden wie besehen",
+      "returnToSupplier": "An Lieferanten zurück"
+    },
+    "rootCause": "Grundursache"
   },
   "jobCreate": {
     "title": "Neuen Auftrag erstellen",

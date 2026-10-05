@@ -29,6 +29,22 @@ import { DataTable } from "@/components/ui/data-table/DataTable";
 import { DataTableColumnHeader } from "@/components/ui/data-table/DataTableColumnHeader";
 import type { DataTableFilterableColumn } from "@/components/ui/data-table/DataTable";
 
+// issues.ncr_category / disposition values -> their i18n keys.
+const NCR_CATEGORY_KEYS: Record<string, string> = {
+  material_defect: "materialDefect",
+  dimensional: "dimensional",
+  surface_finish: "surfaceFinish",
+  process_error: "processError",
+  other: "other",
+};
+
+const DISPOSITION_KEYS: Record<string, string> = {
+  scrap: "scrap",
+  rework: "rework",
+  use_as_is: "useAsIs",
+  return_to_supplier: "returnToSupplier",
+};
+
 interface Issue {
   id: string;
   description: string;
@@ -36,6 +52,13 @@ interface Issue {
   status: string;
   created_at: string;
   image_paths: string[] | null;
+  issue_type: string | null;
+  ncr_category: string | null;
+  disposition: string | null;
+  affected_quantity: number | null;
+  root_cause: string | null;
+  resolution_notes: string | null;
+  reviewed_at: string | null;
   current_cell: {
     name: string;
   } | null;
@@ -427,6 +450,37 @@ export default function IssueQueue() {
                 </div>
               </div>
 
+              {selectedIssue.issue_type === "ncr" && (
+                <div className="grid grid-cols-3 gap-4 p-3 rounded border">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">{t("issues.ncrCategory")}</div>
+                    <div className="text-sm font-medium">
+                      {selectedIssue.ncr_category
+                        ? t(`issues.ncrCategories.${NCR_CATEGORY_KEYS[selectedIssue.ncr_category] ?? "other"}`)
+                        : "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">{t("issues.disposition")}</div>
+                    <div className="text-sm font-medium">
+                      {selectedIssue.disposition
+                        ? t(`issues.dispositions.${DISPOSITION_KEYS[selectedIssue.disposition] ?? "scrap"}`)
+                        : "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">{t("issues.affectedQuantity")}</div>
+                    <div className="text-sm font-medium">{selectedIssue.affected_quantity ?? "-"}</div>
+                  </div>
+                  {selectedIssue.root_cause && (
+                    <div className="col-span-3">
+                      <div className="text-sm text-muted-foreground mb-1">{t("issues.rootCause")}</div>
+                      <div className="text-sm">{selectedIssue.root_cause}</div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="text-sm text-muted-foreground mb-1">
@@ -482,6 +536,15 @@ export default function IssueQueue() {
                   </div>
                 )}
 
+              {selectedIssue.status !== "pending" ? (
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">
+                    {t("issues.resolutionNotes")}
+                    {selectedIssue.reviewed_at && ` · ${format(new Date(selectedIssue.reviewed_at), "PPp")}`}
+                  </div>
+                  <div className="text-sm p-3 bg-muted rounded">{selectedIssue.resolution_notes || "-"}</div>
+                </div>
+              ) : (
               <div>
                 <Label htmlFor="resolution">
                   {t("issues.resolutionNotes")} *
@@ -494,10 +557,11 @@ export default function IssueQueue() {
                   rows={4}
                 />
               </div>
+              )}
             </div>
           )}
 
-          {selectedIssue && (
+          {selectedIssue && selectedIssue.status === "pending" && (
             <div className="shrink-0 flex gap-3 border-t pt-4">
               <Button
                 onClick={() => handleReview("approved")}
