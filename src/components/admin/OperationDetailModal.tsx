@@ -40,6 +40,7 @@ import {
   Zap,
   TimerReset,
   Cpu,
+  ClipboardCheck,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
@@ -206,6 +207,22 @@ export default function OperationDetailModal({
   });
 
   const updatePlanMutation = useUpdateOperationPlan(operationId);
+
+  // Produced / good / scrap reported for this operation (by operators or integrations).
+  const { data: quantities } = useQuery({
+    queryKey: ["operation-quantities", operationId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("operation_quantities")
+        .select("id, quantity_produced, quantity_good, quantity_scrap, quantity_rework, notes, recorded_at, scrap_reason:scrap_reasons(code, description)")
+        .eq("operation_id", operationId)
+        .eq("tenant_id", profile!.tenant_id)
+        .order("recorded_at");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!operationId && !!profile?.tenant_id,
+  });
 
   const bookedHours = useOperationBookedHours(
     operationId,
@@ -570,6 +587,42 @@ export default function OperationDetailModal({
                     </Button>
                   </div>
                 </div>
+
+                {/* QUANTITIES — produced / good / scrap with the scrap reason and notes */}
+                {quantities && quantities.length > 0 && (
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <ClipboardCheck className="h-4 w-4 text-primary" />
+                      <h4 className="text-sm font-semibold">{t("operations.quantities.title")}</h4>
+                    </div>
+                    {quantities.map((record) => (
+                      <div key={record.id} className="space-y-2">
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="p-2 rounded-md bg-muted/40 border">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{t("operations.quantities.produced")}</p>
+                            <p className="mt-0.5 text-sm font-semibold">{record.quantity_produced}</p>
+                          </div>
+                          <div className="p-2 rounded-md bg-muted/40 border">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{t("operations.quantities.good")}</p>
+                            <p className="mt-0.5 text-sm font-semibold text-emerald-600">{record.quantity_good}</p>
+                          </div>
+                          <div className={`p-2 rounded-md border ${record.quantity_scrap > 0 ? "bg-red-500/10 border-red-500/30" : "bg-muted/40"}`}>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{t("operations.quantities.scrap")}</p>
+                            <p className={`mt-0.5 text-sm font-semibold ${record.quantity_scrap > 0 ? "text-red-600" : ""}`}>{record.quantity_scrap}</p>
+                          </div>
+                        </div>
+                        {record.scrap_reason && (
+                          <p className="text-xs">
+                            <span className="text-muted-foreground">{t("operations.quantities.reason")}: </span>
+                            <span className="font-medium">{record.scrap_reason.code}</span>
+                            <span className="text-muted-foreground"> · {record.scrap_reason.description}</span>
+                          </p>
+                        )}
+                        {record.notes && <p className="text-xs text-muted-foreground">{record.notes}</p>}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* BOOKED HOURS — summed time_entries + drill-down + planned vs booked */}
                 <div className="border rounded-lg p-4 space-y-3">

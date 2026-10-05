@@ -482,7 +482,14 @@
     },
     "statusUpdatedDesc": "Arbeitsgangstatus wurde aktualisiert",
     "operatorAssignedDesc": "Bediener wurde dem Arbeitsgang zugewiesen",
-    "holdClearsAtTerminal": "Wird aufgehoben, sobald ein Bediener den Arbeitsgang am Terminal startet."
+    "holdClearsAtTerminal": "Wird aufgehoben, sobald ein Bediener den Arbeitsgang am Terminal startet.",
+    "quantities": {
+      "title": "Mengen",
+      "produced": "Produziert",
+      "good": "Gut",
+      "scrap": "Ausschuss",
+      "reason": "Ausschussgrund"
+    }
   },
   "issues": {
     "title": "Problemverwaltung",

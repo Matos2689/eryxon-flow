@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
+  Trash2,
   LogOut,
   LayoutDashboard,
   ListChecks,
@@ -226,6 +227,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       path: "/admin/config/steps-templates",
       label: t("navigation.templates"),
       icon: FileText,
+      exact: true,
+    },
+    {
+      path: "/admin/config/scrap-reasons",
+      label: t("navigation.scrapReasons"),
+      icon: Trash2,
       exact: true,
     },
   ];

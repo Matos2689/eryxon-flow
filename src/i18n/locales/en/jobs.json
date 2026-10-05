@@ -482,7 +482,14 @@
       "onHold": "On Hold",
       "waiting": "Waiting on earlier step"
     },
-    "holdClearsAtTerminal": "Cleared when an operator starts the operation at the terminal."
+    "holdClearsAtTerminal": "Cleared when an operator starts the operation at the terminal.",
+    "quantities": {
+      "title": "Quantities",
+      "produced": "Produced",
+      "good": "Good",
+      "scrap": "Scrap",
+      "reason": "Scrap reason"
+    }
   },
   "issues": {
     "title": "Issue Management",

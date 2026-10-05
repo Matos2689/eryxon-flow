@@ -482,7 +482,14 @@
       "onHold": "In de wacht",
       "waiting": "Wacht op eerdere stap"
     },
-    "holdClearsAtTerminal": "Vervalt zodra een operator de bewerking op de terminal start."
+    "holdClearsAtTerminal": "Vervalt zodra een operator de bewerking op de terminal start.",
+    "quantities": {
+      "title": "Aantallen",
+      "produced": "Geproduceerd",
+      "good": "Goed",
+      "scrap": "Afkeur",
+      "reason": "Afkeurreden"
+    }
   },
   "issues": {
     "title": "Probleembeheer",
