@@ -58,6 +58,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { usePendingIssuesCount } from "@/hooks/usePendingIssuesCount";
+import { useLiveProductionData } from "@/hooks/useLiveProductionData";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -86,6 +87,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [tenantSwitcherOpen, setTenantSwitcherOpen] = useState(false);
   const { count: pendingIssuesCount } = usePendingIssuesCount();
+  useLiveProductionData(profile?.tenant_id);
   const { flags: featureFlags } = useFeatureFlags();
 
   const isActive = (path: string) => location.pathname === path;
