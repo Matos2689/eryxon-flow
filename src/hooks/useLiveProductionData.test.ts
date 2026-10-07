@@ -66,6 +66,11 @@ describe('useLiveProductionData', () => {
     );
   });
 
+  it('refreshes the per-row Flow columns too', () => {
+    // PartFlowCell and FlowCell cache each row's operations under their own keys.
+    expect(LIVE_PRODUCTION_QUERY_ROOTS).toEqual(expect.arrayContaining(['part-flow', 'job-flow']));
+  });
+
   it('does not subscribe before the tenant is known', () => {
     setup(null);
 

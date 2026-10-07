@@ -13,6 +13,9 @@ export const LIVE_PRODUCTION_QUERY_ROOTS = [
   'operation-quantities',
   'production',
   'quality',
+  // The Flow columns fetch each row's operations under their own keys.
+  'part-flow',
+  'job-flow',
 ] as const;
 
 const PRODUCTION_TABLES = ['jobs', 'parts', 'operations', 'operation_quantities'] as const;
