@@ -44,6 +44,81 @@ const globalFilterFn: FilterFn<unknown> = (row, columnId, filterValue) => {
   return rowValues.some(value => value.toLowerCase().includes(search));
 };
 
+interface FloatingScrollbarState {
+  /** Shown while the table scrolls sideways and its own bottom edge is below the window. */
+  visible: boolean;
+  contentWidth: number;
+  viewportWidth: number;
+}
+
+/**
+ * A horizontal scrollbar pinned to the bottom of the window, kept in sync with the table's own,
+ * so a wide table can be scrolled sideways without first scrolling down to its last row.
+ */
+function useFloatingHorizontalScrollbar(containerRef: React.RefObject<HTMLDivElement>) {
+  const barRef = React.useRef<HTMLDivElement>(null);
+  const [state, setState] = React.useState<FloatingScrollbarState>({ visible: false, contentWidth: 0, viewportWidth: 0 });
+
+  React.useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container || typeof window === "undefined") return;
+
+    const measure = () => {
+      const scrollsSideways = container.scrollWidth > container.clientWidth;
+      const ownScrollbarBelowWindow = container.getBoundingClientRect().bottom > window.innerHeight;
+      const next = {
+        visible: scrollsSideways && ownScrollbarBelowWindow,
+        contentWidth: container.scrollWidth,
+        viewportWidth: container.clientWidth,
+      };
+      setState((previous) =>
+        previous.visible === next.visible &&
+        previous.contentWidth === next.contentWidth &&
+        previous.viewportWidth === next.viewportWidth
+          ? previous
+          : next);
+    };
+
+    const followTable = () => {
+      if (barRef.current && barRef.current.scrollLeft !== container.scrollLeft) {
+        barRef.current.scrollLeft = container.scrollLeft;
+      }
+    };
+
+    measure();
+    container.addEventListener("scroll", followTable);
+    window.addEventListener("resize", measure);
+    // Captured, so the page scrolling inside any layout container is seen too.
+    window.addEventListener("scroll", measure, true);
+    const layoutObserver = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(measure);
+    layoutObserver?.observe(container);
+    layoutObserver?.observe(document.body);
+
+    return () => {
+      container.removeEventListener("scroll", followTable);
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure, true);
+      layoutObserver?.disconnect();
+    };
+  }, [containerRef]);
+
+  // Mounted or re-shown: start where the table currently is.
+  React.useLayoutEffect(() => {
+    if (state.visible && barRef.current && containerRef.current) {
+      barRef.current.scrollLeft = containerRef.current.scrollLeft;
+    }
+  }, [state.visible, containerRef]);
+
+  const onBarScroll = React.useCallback(() => {
+    const container = containerRef.current;
+    if (container && barRef.current && container.scrollLeft !== barRef.current.scrollLeft) {
+      container.scrollLeft = barRef.current.scrollLeft;
+    }
+  }, [containerRef]);
+
+  return { barRef, state, onBarScroll };
+}
+
 interface DataRowProps<TData> {
   row: Row<TData>;
   onRowClick?: (row: TData) => void;
@@ -156,6 +231,9 @@ export function DataTable<TData, TValue>({
 
   const debouncedGlobalFilter = useDebounce(globalFilter, searchDebounce);
 
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const floatingScrollbar = useFloatingHorizontalScrollbar(scrollContainerRef);
+
   const table = useReactTable<TData>({
     data,
     columns,
@@ -196,13 +274,16 @@ export function DataTable<TData, TValue>({
         />
       )}
       <div
+        ref={scrollContainerRef}
         className={cn(
           "table-container rounded-md border bg-card overflow-auto",
           stickyHeader && "relative"
         )}
         style={{ maxHeight: stickyHeader ? maxHeight : undefined }}
       >
-        <Table style={minWidth ? { minWidth } : undefined}>
+        {/* This container scrolls both ways (an inner scroller also held the sticky header), and
+            the floating scrollbar below follows its horizontal position. */}
+        <Table containerClassName="overflow-visible" style={minWidth ? { minWidth } : undefined}>
           <TableHeader className={cn(
             stickyHeader && "sticky top-0 bg-card z-10 shadow-sm"
           )}>
@@ -282,6 +363,18 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
+      </div>
+      {/* Pinned to the bottom of the window while the table's own horizontal scrollbar is below it. */}
+      <div
+        ref={floatingScrollbar.barRef}
+        hidden={!floatingScrollbar.state.visible}
+        aria-hidden
+        data-testid="floating-horizontal-scrollbar"
+        onScroll={floatingScrollbar.onBarScroll}
+        className="sticky bottom-0 z-20 overflow-x-auto overflow-y-hidden rounded-md border bg-card"
+        style={{ width: floatingScrollbar.state.viewportWidth + 2 }}
+      >
+        <div style={{ width: floatingScrollbar.state.contentWidth, height: 1 }} />
       </div>
       {showPagination && (
         <DataTablePagination table={table} pageSizeOptions={pageSizeOptions} />
