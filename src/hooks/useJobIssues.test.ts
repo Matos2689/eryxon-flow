@@ -4,12 +4,19 @@ import { useJobIssues } from './useJobIssues';
 
 // Mock Supabase
 const mockRpc = vi.fn();
+const issueBindings: { filter?: string; callback: (payload: unknown) => void }[] = [];
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     rpc: (...args: any[]) => mockRpc(...args),
     channel: () => {
-      const channel = { on: () => channel, subscribe: () => channel };
+      const channel = {
+        on: (_type: string, config: { filter?: string }, callback: (payload: unknown) => void) => {
+          issueBindings.push({ filter: config.filter, callback });
+          return channel;
+        },
+        subscribe: () => channel,
+      };
       return channel;
     },
     removeChannel: vi.fn(),
@@ -19,6 +26,7 @@ vi.mock('@/integrations/supabase/client', () => ({
 describe('useJobIssues', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    issueBindings.length = 0;
     mockRpc.mockResolvedValue({
       data: [{ total_count: 0, pending_count: 0, highest_severity: null }],
       error: null,
@@ -160,6 +168,24 @@ describe('useJobIssues', () => {
 
       expect(result.current.highestSeverity).toBe(severity);
     }
+  });
+
+  it('refreshes when an issue is created already closed', async () => {
+    const { result } = renderHook(() => useJobIssues('job-1'));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    mockRpc.mockResolvedValue({
+      data: [{ total_count: 1, pending_count: 0, highest_severity: 'medium' }],
+      error: null,
+    });
+
+    // An NCR raised for a scrapped part arrives with status "closed".
+    expect(issueBindings).not.toHaveLength(0);
+    issueBindings
+      .filter((binding) => binding.filter === undefined)
+      .forEach((binding) => binding.callback({ eventType: 'INSERT', new: { status: 'closed' } }));
+
+    await waitFor(() => expect(result.current.totalCount).toBe(1));
   });
 
   it('handles null severity gracefully', async () => {

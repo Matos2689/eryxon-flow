@@ -63,10 +63,13 @@ export function usePartIssues(partId: string | undefined) {
     fetchIssueSummary();
   }, [partId, fetchIssueSummary]);
 
+  // Every issue change, not only pending ones: the badge counts closed issues too, and an issue can
+  // be created already closed (e.g. the NCR an integration raises for a scrapped part). RLS keeps
+  // the notifications to the user's tenant.
   useTableSubscription(
     'issues',
     fetchIssueSummary,
-    { filter: 'status=eq.pending', enabled: !!partId, debounceMs: 200 }
+    { enabled: !!partId, debounceMs: 200 }
   );
 
   return { ...summary, loading };
